@@ -1,6 +1,9 @@
 package com.cx.bank.test;
 
 import com.cx.bank.manager.ManagerImpl;
+import com.cx.bank.model.MoneyBean;
+import com.cx.bank.util.AccountOverDrawnException;
+import com.cx.bank.util.InvalidDepositException;
 
 import java.util.Scanner;
 
@@ -10,9 +13,13 @@ import java.util.Scanner;
  */
 public class TestBank {
     /**
-     * 生成业务层对象
+     * 业务层对象
      */
     ManagerImpl mpl = ManagerImpl.getInstance();
+    /**
+     * 存款对象
+     */
+    MoneyBean m = new MoneyBean();
     /**
      * 选项序号
      */
@@ -21,6 +28,10 @@ public class TestBank {
      * 判断程序能否继续进行
      */
     boolean b = true;
+    /**
+     * 用户输入的金额
+     */
+    double money = 0;
 
     /**
      * 测试函数构造方法，生成测试选择界面并且调用业务层的各个方法
@@ -43,13 +54,31 @@ public class TestBank {
             //进行选项判断
             switch (choNum) {
                 case 1:
-                    mpl.inquiry();
+                    mpl.inquiry(m);
                     break;
                 case 2:
-                    mpl.withdrawals();
+                    System.out.println("请输入您的取款金额：");
+                    money = sc.nextDouble();
+                    try {
+                        if (money <= m.getMoney()) {
+                            mpl.withdrawals(money, m);
+                        } else {
+                            throw new AccountOverDrawnException();
+                        }
+                    } catch (AccountOverDrawnException ignored) {
+                    }
                     break;
                 case 3:
-                    mpl.deposit();
+                    System.out.println("请输入您的存款金额：");
+                    money = sc.nextDouble();
+                    try {
+                        if (money > 0) {
+                            mpl.deposit(money, m);
+                        } else {
+                            throw new InvalidDepositException();
+                        }
+                    } catch (InvalidDepositException ignored) {
+                    }
                     break;
                 case 4:
                     mpl.exitSystem();
