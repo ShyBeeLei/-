@@ -12,7 +12,7 @@ public class TestBank {
     /**
      * 生成业务层对象
      */
-    ManagerImpl Mpl = new ManagerImpl();
+    ManagerImpl Mpl=ManagerImpl.getInstance();
     /**
      * 判断程序能否继续进行
      */

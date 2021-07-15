@@ -23,6 +23,15 @@ public class ManagerImpl {
     double money = 0;
 
     /**
+     * 使用单例模式进行封装
+     */
+    private static ManagerImpl instance=new ManagerImpl();
+    private ManagerImpl(){};
+    public static ManagerImpl getInstance(){
+        return instance;
+    }
+
+    /**
      * 查询余额方法
      *
      * @return void
