@@ -8,7 +8,7 @@ public class MoneyBean {
     /**
      * 剩余金额
      */
-    private double money;
+    double money;
 
 
     public MoneyBean() {
