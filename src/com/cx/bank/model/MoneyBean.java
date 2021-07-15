@@ -6,9 +6,7 @@ package com.cx.bank.model;
  */
 public class MoneyBean {
     /**
-     * 构造方法以及setter和getter
-     *
-     * @param money:剩余金额
+     * 剩余金额
      */
     private double money;
 
