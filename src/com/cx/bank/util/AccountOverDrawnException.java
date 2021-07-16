@@ -7,8 +7,10 @@ package com.cx.bank.util;
  * @Date 2021/7/14 16:55
  * @Version 1.0
  */
-public class AccountOverDrawnException extends Exception{
-    public AccountOverDrawnException(){
-        System.out.println("您的余额不足，请重试。");
+public class AccountOverDrawnException extends Exception {
+    public AccountOverDrawnException() {
+    }
+    public AccountOverDrawnException(String message){
+        super(message);
     }
 }

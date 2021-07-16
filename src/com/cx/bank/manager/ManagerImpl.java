@@ -1,7 +1,6 @@
 package com.cx.bank.manager;
 
 import com.cx.bank.dao.BankDaoImpl;
-import com.cx.bank.model.MoneyBean;
 import com.cx.bank.model.UserBean;
 
 import java.util.Scanner;
@@ -18,70 +17,72 @@ public class ManagerImpl implements ManagerInterface {
     /**
      * 持久层接口
      */
-    BankDaoImpl bdi =BankDaoImpl.getInstance();
+    BankDaoImpl bdi = BankDaoImpl.getInstance();
     /**
-     * 用户输入的金额。
+     * 创建加密方法对象
      */
-    double money = 0;
 
     /**
-     * 使用单例模式进行封装
+     * 创建单例模式
      */
-    private static ManagerImpl instance = new ManagerImpl();
+    private static ManagerImpl instance;
 
     private ManagerImpl() {
     }
 
     public static ManagerImpl getInstance() {
+        if (instance == null) {
+            instance = new ManagerImpl();
+        }
         return instance;
     }
 
     @Override
-    public void inquiry(UserBean u) {
-        System.out.println("您的余额为：" + u.getMoney() + "元");
+    public double inquiry(UserBean u) {
+        return u.getMoney();
     }
 
     @Override
     public void withdrawals(double amount, UserBean u) {
         u.setMoney(u.getMoney() - amount);
-        System.out.println("取款成功！您的余额为：" + u.getMoney() + "元");
     }
 
     @Override
     public void deposit(double amount, UserBean u) {
         u.setMoney(u.getMoney() + amount);
-        System.out.println("存款成功！您的余额为：" + u.getMoney() + "元");
     }
 
     @Override
-    public void exitSystem(double amount,UserBean u) {
-        bdi.saveMoney(amount,u);
-        System.out.println("欢迎下次使用！");
+    public boolean transfer(UserBean u, String name, double amount) {
+        u.setMoney(u.getMoney() - amount);
+        return bdi.updateMoney(name, amount);
+    }
+
+    @Override
+    public void exitSystem(double amount, UserBean u) {
+        bdi.saveMoney(amount, u);
+        sc.close();
+        System.exit(0);
+    }
+
+    @Override
+    public void exitSystem() {
         sc.close();
         System.exit(0);
     }
 
     @Override
     public boolean register(String name, String password) {
-        if (bdi.findByName(name)) {
-            System.out.println("用户名已被注册，请换一个吧！");
-            return false;
-        } else {
+        if (!bdi.findByName(name)) {
             UserBean u = new UserBean(name, password, 0);
             bdi.insertUser(u);
-            System.out.println("注册成功！");
             return true;
         }
+        return false;
     }
 
     @Override
     public UserBean login(String name, String password) {
-        if (bdi.findUser(name, password)) {
-            System.out.println("登录成功！");
-            return bdi.getUser(name, password);
-        } else {
-            System.out.println("账号密码错误！请重新输入。");
-            return null;
-        }
+        return bdi.getUser(name,password);
     }
 }

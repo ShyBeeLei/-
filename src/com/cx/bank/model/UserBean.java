@@ -7,18 +7,18 @@ package com.cx.bank.model;
  * @Date 2021/7/14 17:44
  * @Version 1.4
  */
-public class UserBean extends MoneyBean{
+public class UserBean extends MoneyBean {
     public String userName;
     public String password;
 
     public UserBean() {
     }
 
-    public UserBean(String userName, String password,double amount) {
+    public UserBean(String userName, String password, double amount) {
         super();
         this.userName = userName;
         this.password = password;
-        this.money=amount;
+        this.money = amount;
     }
 
     public String getUserName() {
