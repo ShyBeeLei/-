@@ -28,7 +28,7 @@ public class ManagerImpl implements ManagerInterface {
     private ManagerImpl() {
     }
 
-    public static ManagerImpl getInstance() {
+    public static synchronized ManagerImpl getInstance() {
         if (instance == null) {
             instance = new ManagerImpl();
         }
