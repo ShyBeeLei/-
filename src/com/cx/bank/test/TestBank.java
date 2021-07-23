@@ -1,6 +1,8 @@
+
 package com.cx.bank.test;
 
 import com.cx.bank.manager.ManagerImpl;
+import com.cx.bank.model.MoneyBean;
 import com.cx.bank.model.UserBean;
 import com.cx.bank.util.AccountOverDrawnException;
 import com.cx.bank.util.InvalidDepositException;
@@ -20,15 +22,15 @@ public class TestBank {
     /**
      * 用户对象
      */
-    UserBean u = new UserBean();
+    UserBean userBean = new UserBean();
+    /**
+     * 钱包对象
+     */
+    MoneyBean moneyBean = new MoneyBean();
     /**
      * 扫描器
      */
     Scanner sc = new Scanner(System.in);
-    /**
-     * 选项序号
-     */
-    private int choNum;
     /**
      * 判断程序能否继续进行
      */
@@ -37,6 +39,10 @@ public class TestBank {
      * 用户输入的金额
      */
     double money = 0;
+    /**
+     * 选项序号
+     */
+    private int choNum;
 
     /**
      * 测试函数构造方法，生成测试选择界面并且调用业务层的各个方法
@@ -71,7 +77,7 @@ public class TestBank {
                     if (mpi.register(name2, password2)) {
                         //记录状态并进入登录界面
                         System.out.println("注册成功！");
-                        u = new UserBean(name2, password2, 0.0);
+                        userBean = new UserBean(name2, password2);
                         break;
                     } else {
                         //回到初始界面重新登陆
@@ -86,7 +92,8 @@ public class TestBank {
                     String password = sc.next();
                     if (mpi.login(name, password) != null) {
                         //记录状态并跳出登录界面循环
-                        u = mpi.login(name, password);
+                        moneyBean = mpi.login(name, password);
+                        userBean = new UserBean(name, password);
                         System.out.println("登陆成功！");
                         flag = false;
                         break;
@@ -122,20 +129,23 @@ public class TestBank {
             //进行选项判断
             switch (choNum) {
                 case 1:
-                    System.out.println("您的余额为：" + mpi.inquiry(u));
+                    System.out.println("您的余额为：" + mpi.inquiry(moneyBean));
                     break;
                 case 2:
                     System.out.println("请输入您的取款金额：");
-
                     try {
                         money = sc.nextDouble();
-                        if (money <= u.getMoney()) {
-                            mpi.withdrawals(money, u);
-                            System.out.println("取款成功！");
+                        if (money > 0) {
+                            if (money <= moneyBean.getMoney()) {
+                                mpi.withdrawals(money, moneyBean);
+                                System.out.println("取款成功！");
+                            } else {
+                                throw new AccountOverDrawnException("您的余额不足！");
+                            }
                         } else {
-                            throw new AccountOverDrawnException("您的余额不足！");
+                            throw new InvalidDepositException("请输入正确的金额！");
                         }
-                    } catch (AccountOverDrawnException e) {
+                    } catch (AccountOverDrawnException | InvalidDepositException e) {
                         System.out.println(e.getMessage());
                     } catch (InputMismatchException e) {
                         System.out.println("请输入正确的数额！");
@@ -147,7 +157,7 @@ public class TestBank {
                     try {
                         money = sc.nextDouble();
                         if (money > 0) {
-                            mpi.deposit(money, u);
+                            mpi.deposit(money, moneyBean);
                             System.out.println("存款成功！");
                         } else {
                             throw new InvalidDepositException("请输入正确的金额！");
@@ -156,7 +166,7 @@ public class TestBank {
                         System.out.println(e.getMessage());
                         sc = new Scanner(System.in);
                     } catch (InputMismatchException e) {
-                        System.out.println("请输入正确的数额！");
+                        System.out.println("请输入正确的金额！");
                         sc = new Scanner(System.in);
                     }
                     break;
@@ -165,27 +175,31 @@ public class TestBank {
                     String password = sc.next();
                     System.out.println("请再输入一次您的密码");
                     if (password.equals(sc.next())) {
-                        if (mpi.login(u.getUserName(), password) != null) {
+                        if (mpi.login(userBean.getUserName(), password) != null) {
                             System.out.println("请输入收款方账号：");
                             String name = sc.next();
                             System.out.println("请输入您的转账金额：");
                             try {
                                 money = sc.nextDouble();
-                                if (money <= u.getMoney()) {
-                                    if (mpi.transfer(u, name, money)) {
-                                        System.out.println("转账成功！");
-                                        break;
+                                if (money > 0) {
+                                    if (money <= moneyBean.getMoney()) {
+                                        if (mpi.transfer(moneyBean, name, money)) {
+                                            System.out.println("转账成功！");
+                                            break;
+                                        } else {
+                                            System.out.println("收款方不存在！");
+                                            continue;
+                                        }
                                     } else {
-                                        System.out.println("收款方不存在！");
-                                        continue;
+                                        throw new AccountOverDrawnException("您的余额不足！");
                                     }
                                 } else {
-                                    throw new AccountOverDrawnException("您的余额不足！");
+                                    throw new InvalidDepositException("请输入正确的金额！");
                                 }
-                            } catch (AccountOverDrawnException e) {
+                            } catch (AccountOverDrawnException | InvalidDepositException e) {
                                 System.out.println(e.getMessage());
                             } catch (InputMismatchException e) {
-                                System.out.println("请输入正确的数额！");
+                                System.out.println("请输入正确的金额！");
                                 sc = new Scanner(System.in);
                             }
                         }
@@ -195,7 +209,7 @@ public class TestBank {
                     }
                 case 5:
                     System.out.println("欢迎下次使用！");
-                    mpi.exitSystem(u.getMoney(), u);
+                    mpi.exitSystem(moneyBean, userBean);
                 default:
                     System.out.println("请输入正确的选项！");
                     break;

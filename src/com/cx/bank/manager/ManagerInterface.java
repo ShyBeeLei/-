@@ -1,5 +1,6 @@
 package com.cx.bank.manager;
 
+import com.cx.bank.model.MoneyBean;
 import com.cx.bank.model.UserBean;
 
 /**
@@ -10,36 +11,36 @@ public interface ManagerInterface {
     /**
      * 查询账户余额
      *
-     * @param u User对象
+     * @param moneyBean 钱包对象
      * @return 对象钱包的余额
      */
-    double inquiry(UserBean u);
+    double inquiry(MoneyBean moneyBean);
 
     /**
      * 取款方法
      *
-     * @param amount 取款金额
-     * @param u      取款用户
+     * @param amount    取款金额
+     * @param moneyBean 取款钱包
      */
-    void withdrawals(double amount, UserBean u);
+    void withdrawals(double amount, MoneyBean moneyBean);
 
     /**
      * 存款方法
      *
-     * @param amount 存款金额
-     * @param u      存款用户
+     * @param amount    存款金额
+     * @param moneyBean 存款钱包
      */
-    void deposit(double amount, UserBean u);
+    void deposit(double amount, MoneyBean moneyBean);
 
     /**
      * 转账功能
      *
-     * @param u      转账用户
-     * @param name   收款用户名
-     * @param amount 转账金额
+     * @param moneyBean 转账钱包
+     * @param name      收款用户名
+     * @param amount    转账金额
      * @return 用户输入的账号是否正确
      */
-    boolean transfer(UserBean u, String name, double amount);
+    boolean transfer(MoneyBean moneyBean, String name, double amount);
 
     /**
      * 重载一个没有参数的退出方法。
@@ -49,10 +50,10 @@ public interface ManagerInterface {
     /**
      * 退出系统
      *
-     * @param amount 账户余额
-     * @param u      用户标记
+     * @param moneyBean 账户钱包
+     * @param userBean  用户标记
      */
-    void exitSystem(double amount, UserBean u);
+    void exitSystem(MoneyBean moneyBean, UserBean userBean);
 
     /**
      * 注册账号
@@ -70,5 +71,5 @@ public interface ManagerInterface {
      * @param password 用户输入的密码
      * @return 用户对象
      */
-    UserBean login(String name, String password);
+    MoneyBean login(String name, String password);
 }

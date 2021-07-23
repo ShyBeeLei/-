@@ -11,7 +11,8 @@ public class InvalidDepositException extends Exception {
     public InvalidDepositException() {
         super();
     }
-    public InvalidDepositException(String message){
+
+    public InvalidDepositException(String message) {
         super(message);
     }
 }

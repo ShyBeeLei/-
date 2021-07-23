@@ -10,7 +10,8 @@ package com.cx.bank.util;
 public class AccountOverDrawnException extends Exception {
     public AccountOverDrawnException() {
     }
-    public AccountOverDrawnException(String message){
+
+    public AccountOverDrawnException(String message) {
         super(message);
     }
 }

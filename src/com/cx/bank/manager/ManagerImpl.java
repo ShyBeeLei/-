@@ -1,9 +1,10 @@
+
 package com.cx.bank.manager;
 
 import com.cx.bank.dao.BankDaoImpl;
+import com.cx.bank.factory.UserDaoFactory;
+import com.cx.bank.model.MoneyBean;
 import com.cx.bank.model.UserBean;
-
-import java.util.Scanner;
 
 /**
  * @author Bruce Xu
@@ -11,21 +12,18 @@ import java.util.Scanner;
  */
 public class ManagerImpl implements ManagerInterface {
     /**
-     * 扫描器
-     */
-    Scanner sc = new Scanner(System.in);
-    /**
-     * 持久层接口
-     */
-    BankDaoImpl bdi = BankDaoImpl.getInstance();
-    /**
-     * 创建加密方法对象
-     */
-
-    /**
      * 创建单例模式
      */
     private static ManagerImpl instance;
+    /**
+     * 创建UserDaoFactory单例
+     */
+    UserDaoFactory userDaoFactory = UserDaoFactory.getInstance();
+    /**
+     * 装配持久层对象
+     */
+    BankDaoImpl bdi = userDaoFactory.create();
+
 
     private ManagerImpl() {
     }
@@ -38,43 +36,41 @@ public class ManagerImpl implements ManagerInterface {
     }
 
     @Override
-    public double inquiry(UserBean u) {
-        return u.getMoney();
+    public double inquiry(MoneyBean moneyBean) {
+        return moneyBean.getMoney();
     }
 
     @Override
-    public void withdrawals(double amount, UserBean u) {
-        u.setMoney(u.getMoney() - amount);
+    public void withdrawals(double amount, MoneyBean moneyBean) {
+        moneyBean.setMoney(moneyBean.getMoney() - amount);
     }
 
     @Override
-    public void deposit(double amount, UserBean u) {
-        u.setMoney(u.getMoney() + amount);
+    public void deposit(double amount, MoneyBean moneyBean) {
+        moneyBean.setMoney(moneyBean.getMoney() + amount);
     }
 
     @Override
-    public boolean transfer(UserBean u, String name, double amount) {
-        u.setMoney(u.getMoney() - amount);
+    public boolean transfer(MoneyBean moneyBean, String name, double amount) {
+        moneyBean.setMoney(moneyBean.getMoney() - amount);
         return bdi.updateMoney(name, amount);
     }
 
     @Override
-    public void exitSystem(double amount, UserBean u) {
-        bdi.saveMoney(amount, u);
-        sc.close();
+    public void exitSystem(MoneyBean moneyBean, UserBean u) {
+        bdi.saveMoney(moneyBean, u);
         System.exit(0);
     }
 
     @Override
     public void exitSystem() {
-        sc.close();
         System.exit(0);
     }
 
     @Override
     public boolean register(String name, String password) {
         if (!bdi.findByName(name)) {
-            UserBean u = new UserBean(name, password, 0);
+            UserBean u = new UserBean(name, password);
             bdi.insertUser(u);
             return true;
         }
@@ -82,7 +78,7 @@ public class ManagerImpl implements ManagerInterface {
     }
 
     @Override
-    public UserBean login(String name, String password) {
-        return bdi.getUser(name,password);
+    public MoneyBean login(String name, String password) {
+        return bdi.getMoney(name, password);
     }
 }

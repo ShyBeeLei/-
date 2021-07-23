@@ -1,3 +1,4 @@
+
 package com.cx.bank.model;
 
 /**
@@ -12,6 +13,10 @@ public class MoneyBean {
 
 
     public MoneyBean() {
+    }
+
+    public MoneyBean(double money) {
+        this.money = money;
     }
 
     public double getMoney() {
