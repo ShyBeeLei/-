@@ -1,46 +1,50 @@
 package com.cx.bank.manager;
 
-import com.cx.bank.model.MoneyBean;
-import com.cx.bank.model.UserBean;
+import com.cx.bank.util.AccountOverDrawnException;
+import com.cx.bank.util.InvalidDepositException;
 
 /**
- * @author Bruce Xu
- * @date 2021/7/14 10:00
+ * @ClassName ManagerInterface
+ * @Description 声明业务层方法
+ * @Author Bruce Xu
+ * @Date 2021/7/14 10:00
+ * @Version 1.9
  */
 public interface ManagerInterface {
     /**
      * 查询账户余额
      *
-     * @param moneyBean 钱包对象
      * @return 对象钱包的余额
      */
-    double inquiry(MoneyBean moneyBean);
+    double inquiry();
 
     /**
      * 取款方法
      *
-     * @param amount    取款金额
-     * @param moneyBean 取款钱包
+     * @param amount 取款金额
+     * @throws AccountOverDrawnException 余额不足异常
+     * @throws InvalidDepositException   无效金额异常
      */
-    void withdrawals(double amount, MoneyBean moneyBean);
+    void withdrawals(double amount) throws AccountOverDrawnException, InvalidDepositException;
 
     /**
      * 存款方法
      *
-     * @param amount    存款金额
-     * @param moneyBean 存款钱包
+     * @param amount 存款金额
+     * @throws InvalidDepositException 无效金额异常
      */
-    void deposit(double amount, MoneyBean moneyBean);
+    void deposit(double amount) throws InvalidDepositException;
 
     /**
      * 转账功能
      *
-     * @param moneyBean 转账钱包
-     * @param name      收款用户名
-     * @param amount    转账金额
+     * @param name   收款用户名
+     * @param amount 转账金额
      * @return 用户输入的账号是否正确
+     * @throws AccountOverDrawnException 余额不足异常
+     * @throws InvalidDepositException   无效金额异常
      */
-    boolean transfer(MoneyBean moneyBean, String name, double amount);
+    boolean transfer(String name, double amount) throws InvalidDepositException, AccountOverDrawnException;
 
     /**
      * 重载一个没有参数的退出方法。
@@ -50,10 +54,9 @@ public interface ManagerInterface {
     /**
      * 退出系统
      *
-     * @param moneyBean 账户钱包
-     * @param userBean  用户标记
+     * @param userName 用户名
      */
-    void exitSystem(MoneyBean moneyBean, UserBean userBean);
+    void exitSystem(String userName);
 
     /**
      * 注册账号
@@ -65,11 +68,19 @@ public interface ManagerInterface {
     boolean register(String name, String password);
 
     /**
+     * 验证用户名是否重复
+     *
+     * @param name 用户传入的用户名
+     * @return 用户名是否存在
+     */
+    boolean verifyUserName(String name);
+
+    /**
      * 登录账号
      *
      * @param name     用户输入的姓名
      * @param password 用户输入的密码
      * @return 用户对象
      */
-    MoneyBean login(String name, String password);
+    String login(String name, String password);
 }

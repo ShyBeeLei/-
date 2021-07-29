@@ -6,11 +6,13 @@ package com.cx.bank.model;
  * @Description 封装用户数据
  * @Author Bruce Xu
  * @Date 2021/7/14 17:44
- * @Version 1.4
+ * @Version 1.9
  */
 public class UserBean {
+    public int userId;
     public String userName;
     public String password;
+
 
     public UserBean() {
     }
@@ -19,6 +21,14 @@ public class UserBean {
         super();
         this.userName = userName;
         this.password = password;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getUserName() {

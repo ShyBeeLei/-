@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
  * @Date 2021/7/14 17:56
  * @Version 1.4
  */
-public class BankDaoImpl implements BankDaoInterface {
+public class FileDaoImpl implements BankDaoInterface {
     /**
      * 文件后缀名
      */
-    static final String SUFFIX = ".properties";
+    static final java.lang.String SUFFIX = ".properties";
     /**
      * 创建加密方法对象
      */
@@ -45,13 +45,13 @@ public class BankDaoImpl implements BankDaoInterface {
     public static List<UserBean> getUsers() {
         try {
             File dir = new File("");
-            String projectName = dir.getCanonicalPath();
+            java.lang.String projectName = dir.getCanonicalPath();
             File project = new File(projectName);
         /*
         筛选properties文件。
          */
             File[] files = project.listFiles(pathname -> {
-                String name = pathname.getName();
+                java.lang.String name = pathname.getName();
                 return name.endsWith(SUFFIX);
             });
         /*
@@ -76,13 +76,13 @@ public class BankDaoImpl implements BankDaoInterface {
     }
 
     @Override
-    public void saveMoney(MoneyBean moneyBean, UserBean userBean) {
+    public void saveMoney(MoneyBean moneyBean, String userName) {
         //遍历用户表，搜索符合的用户对象
         for (UserBean temp : getUsers()) {
-            if (temp.getUserName().equals(userBean.getUserName())) {
+            if (temp.getUserName().equals(userName)) {
                 //搜索到之后执行存款操作
                 try {
-                    DataOutputStream dos = new DataOutputStream(new FileOutputStream(userBean.getUserName() + SUFFIX));
+                    DataOutputStream dos = new DataOutputStream(new FileOutputStream(userName + SUFFIX));
                     dos.writeBytes("userName=" + temp.getUserName() + "\n");
                     dos.writeBytes("password=" + temp.getPassword() + "\n");
                     dos.writeBytes("money=" + moneyBean.getMoney());
@@ -96,12 +96,12 @@ public class BankDaoImpl implements BankDaoInterface {
     }
 
     @Override
-    public void insertUser(UserBean u) {
+    public void insertUser(String userName, String password) {
         try {
-            OutputStream os = new FileOutputStream(u.getUserName() + SUFFIX);
+            OutputStream os = new FileOutputStream(userName + SUFFIX);
             DataOutputStream dos = new DataOutputStream(os);
-            dos.writeBytes("userName=" + u.getUserName() + "\n");
-            dos.writeBytes("password=" + md5.encode(u.getPassword().getBytes()) + "\n");
+            dos.writeBytes("userName=" + userName + "\n");
+            dos.writeBytes("password=" + md5.encode(password.getBytes()) + "\n");
             dos.writeBytes("money=0.0");
             dos.close();
             //更新用户表数据
@@ -112,7 +112,7 @@ public class BankDaoImpl implements BankDaoInterface {
     }
 
     @Override
-    public boolean updateMoney(String name, double amount) {
+    public boolean updateMoney(java.lang.String name, double amount) {
         for (UserBean temp : getUsers()) {
             if (temp.getUserName().equals(name)) {
                 try {
@@ -132,7 +132,7 @@ public class BankDaoImpl implements BankDaoInterface {
 
 
     @Override
-    public boolean findByName(String name) {
+    public boolean findByName(java.lang.String name) {
         for (UserBean temp : getUsers()) {
             if (temp.getUserName().equals(name)) {
                 return true;
@@ -142,26 +142,26 @@ public class BankDaoImpl implements BankDaoInterface {
     }
 
     @Override
-    public boolean findUser(String name, String password) {
+    public String findUser(java.lang.String name, java.lang.String password) {
         for (UserBean temp : getUsers()) {
             if (temp.getUserName().equals(name) && temp.getPassword().equals(md5.encode(password.getBytes()))) {
-                return true;
+                return temp.userName;
             }
         }
-        return false;
+        return null;
     }
 
     @Override
-    public MoneyBean getMoney(String name, String password) {
+    public double getMoney(String name) {
         try {
             File dir = new File("");
-            String projectName = dir.getCanonicalPath();
+            java.lang.String projectName = dir.getCanonicalPath();
             File project = new File(projectName);
         /*
         筛选properties文件。
          */
             File[] files = project.listFiles(pathname -> {
-                String fileName = pathname.getName();
+                java.lang.String fileName = pathname.getName();
                 return fileName.endsWith(SUFFIX);
             });
         /*
@@ -171,15 +171,14 @@ public class BankDaoImpl implements BankDaoInterface {
                 InputStream is = new FileInputStream(f);
                 Properties p = new Properties();
                 p.load(is);
-                if (p.getProperty("userName").equals(name) && p.getProperty("password").equals(md5.encode(password.getBytes()))) {
-                    moneyBean.setMoney(Double.parseDouble(p.getProperty("money")));
-                    return moneyBean;
+                if (p.getProperty("userName").equals(name)) {
+                    return Double.parseDouble(p.getProperty("money"));
                 }
                 is.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return -1;
     }
 }

@@ -2,8 +2,11 @@
 package com.cx.bank.model;
 
 /**
- * @author Bruce Xu
- * @date 2021/7/14 9:57
+ * @ClassName MoneyBean
+ * @Description 封装钱包数据
+ * @Author Bruce Xu
+ * @Date 2021/7/14 9:57
+ * @Version 1.9
  */
 public class MoneyBean {
     /**

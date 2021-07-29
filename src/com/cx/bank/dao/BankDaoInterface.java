@@ -1,7 +1,6 @@
 package com.cx.bank.dao;
 
 import com.cx.bank.model.MoneyBean;
-import com.cx.bank.model.UserBean;
 
 /**
  * @ClassName BankDaoInterface
@@ -15,16 +14,17 @@ public interface BankDaoInterface {
      * 存储方法
      *
      * @param moneyBean 钱包对象
-     * @param userBean  用户对象
+     * @param userName  用户对象
      */
-    void saveMoney(MoneyBean moneyBean, UserBean userBean);
+    void saveMoney(MoneyBean moneyBean, String userName);
 
     /**
      * 添加用户
      *
-     * @param userBean 用户对象
+     * @param userName 用户名
+     * @param password 用户密码
      */
-    void insertUser(UserBean userBean);
+    void insertUser(String userName, String password);
 
     /**
      * 更新金额
@@ -50,14 +50,13 @@ public interface BankDaoInterface {
      * @param password 密码
      * @return 是否成功
      */
-    boolean findUser(String name, String password);
+    String findUser(String name, String password);
 
     /**
-     * 获取用户信息
+     * 获取余额信息
      *
-     * @param name     用户名
-     * @param password 密码
-     * @return 钱包信息
+     * @param userName 用户名
+     * @return 得到用户余额
      */
-    MoneyBean getMoney(String name, String password);
+    double getMoney(String userName);
 }

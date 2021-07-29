@@ -1,8 +1,6 @@
 
 package com.cx.bank.factory;
 
-import com.cx.bank.dao.BankDaoImpl;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -18,7 +16,7 @@ public class UserDaoFactory {
     /**
      * 创建bankDao对象存储反射创建的实例
      */
-    private static BankDaoImpl bankDao;
+    private static Object bankDao;
     /**
      * 创建UserDaoFactory单例模式
      */
@@ -39,13 +37,13 @@ public class UserDaoFactory {
      *
      * @return bankDao对象
      */
-    public BankDaoImpl create() {
+    public Object create() {
         try {
-            FileInputStream fileInputStream = new FileInputStream("classInfo.properties");
+            FileInputStream fileInputStream = new FileInputStream("src/classInfo.properties");
             Properties properties = new Properties();
             properties.load(fileInputStream);
             String className = properties.getProperty("className");
-            bankDao = (BankDaoImpl) Class.forName(className).newInstance();
+            bankDao = Class.forName(className).newInstance();
         } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
