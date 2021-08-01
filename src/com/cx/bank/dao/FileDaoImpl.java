@@ -23,15 +23,15 @@ public class FileDaoImpl implements BankDaoInterface {
     /**
      * 文件后缀名
      */
-    static final java.lang.String SUFFIX = ".properties";
+    static final String SUFFIX = ".properties";
     /**
      * 创建加密方法对象
      */
     static MD5 md5 = new MD5();
     /**
-     * 钱包对象
+     * 用户对象
      */
-    static MoneyBean moneyBean = new MoneyBean();
+    static UserBean userBean = new UserBean();
     /**
      * 用户对象表
      */
@@ -45,13 +45,13 @@ public class FileDaoImpl implements BankDaoInterface {
     public static List<UserBean> getUsers() {
         try {
             File dir = new File("");
-            java.lang.String projectName = dir.getCanonicalPath();
+            String projectName = dir.getCanonicalPath();
             File project = new File(projectName);
         /*
         筛选properties文件。
          */
             File[] files = project.listFiles(pathname -> {
-                java.lang.String name = pathname.getName();
+                String name = pathname.getName();
                 return name.endsWith(SUFFIX);
             });
         /*
@@ -61,7 +61,8 @@ public class FileDaoImpl implements BankDaoInterface {
                 InputStream is = new FileInputStream(f);
                 Properties p = new Properties();
                 p.load(is);
-                UserBean userBean = new UserBean(p.getProperty("userName"), p.getProperty("password"));
+                userBean.setUserName(p.getProperty("userName"));
+                userBean.setPassword(p.getProperty("password"));
                 users.add(userBean);
                 is.close();
             }
@@ -112,7 +113,7 @@ public class FileDaoImpl implements BankDaoInterface {
     }
 
     @Override
-    public boolean updateMoney(java.lang.String name, double amount) {
+    public boolean updateMoney(String name, double amount) {
         for (UserBean temp : getUsers()) {
             if (temp.getUserName().equals(name)) {
                 try {
@@ -132,7 +133,7 @@ public class FileDaoImpl implements BankDaoInterface {
 
 
     @Override
-    public boolean findByName(java.lang.String name) {
+    public boolean findByName(String name) {
         for (UserBean temp : getUsers()) {
             if (temp.getUserName().equals(name)) {
                 return true;
@@ -142,10 +143,10 @@ public class FileDaoImpl implements BankDaoInterface {
     }
 
     @Override
-    public String findUser(java.lang.String name, java.lang.String password) {
+    public UserBean findUser(String name, String password) {
         for (UserBean temp : getUsers()) {
             if (temp.getUserName().equals(name) && temp.getPassword().equals(md5.encode(password.getBytes()))) {
-                return temp.userName;
+                return temp;
             }
         }
         return null;
@@ -155,13 +156,13 @@ public class FileDaoImpl implements BankDaoInterface {
     public double getMoney(String name) {
         try {
             File dir = new File("");
-            java.lang.String projectName = dir.getCanonicalPath();
+            String projectName = dir.getCanonicalPath();
             File project = new File(projectName);
         /*
         筛选properties文件。
          */
             File[] files = project.listFiles(pathname -> {
-                java.lang.String fileName = pathname.getName();
+                String fileName = pathname.getName();
                 return fileName.endsWith(SUFFIX);
             });
         /*
@@ -180,5 +181,39 @@ public class FileDaoImpl implements BankDaoInterface {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    /**
+     * 通过id查找用户信息
+     *
+     * @param id 用户编号
+     * @return 用户对象
+     */
+    @Override
+    public UserBean findById(int id) {
+        return null;
+    }
+
+    /**
+     * 改变用户状态
+     *
+     * @param id     用户编号
+     * @param status 用户状态
+     */
+    @Override
+    public void setStatus(int id, int status) {
+
+    }
+
+    /**
+     * 记录信息
+     *
+     * @param logType 进行的操作
+     * @param amount  操作的数额
+     * @param id      用户编号
+     */
+    @Override
+    public void log(String logType, Double amount, int id) {
+
     }
 }

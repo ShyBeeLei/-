@@ -86,7 +86,7 @@ public class TestBank {
                     String name = sc.next();
                     System.out.print("请输入您的密码：");
                     String password = sc.next();
-                    userName = mpi.login(name, password);
+                    mpi.login(name, password);
                     if (userName != null) {
                         //记录状态并跳出登录界面循环
                         System.out.println("登陆成功！");
@@ -184,7 +184,7 @@ public class TestBank {
                     }
                 case 5:
                     System.out.println("欢迎下次使用！");
-                    mpi.exitSystem(userName);
+                    mpi.exitSystem();
                 default:
                     System.out.println("请输入正确的选项！");
                     break;

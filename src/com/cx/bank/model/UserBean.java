@@ -9,18 +9,30 @@ package com.cx.bank.model;
  * @Version 1.9
  */
 public class UserBean {
-    public int userId;
-    public String userName;
-    public String password;
+    private int userId;
+    private String userName;
+    private String password;
+    private boolean Admin;
+    private int userFlag;
 
 
     public UserBean() {
     }
 
-    public UserBean(String userName, String password) {
-        super();
-        this.userName = userName;
-        this.password = password;
+    public int getUserFlag() {
+        return userFlag;
+    }
+
+    public void setUserFlag(int userFlag) {
+        this.userFlag = userFlag;
+    }
+
+    public boolean isAdmin() {
+        return Admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        Admin = admin;
     }
 
     public int getUserId() {

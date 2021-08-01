@@ -24,6 +24,10 @@ public class LogIn extends JFrame {
      * 设置字体
      */
     Font fo = new Font("宋体", Font.BOLD, 15);
+    /**
+     * 身份字符串，为0则是用户，1为管理员
+     */
+    String[] identity = {"USER", "ADMIN", "FROZEN"};
 
     LogIn() {
         super("登录");
@@ -36,6 +40,8 @@ public class LogIn extends JFrame {
         jTabbedPane.add("登录", logInPanel);
         JComponent registerPanel = makeRegisterPanel();
         jTabbedPane.add("注册", registerPanel);
+        JComponent adminLoginPanel = makeAdminLogInPanel();
+        jTabbedPane.add("管理员登陆", adminLoginPanel);
 
 
         /*
@@ -48,7 +54,7 @@ public class LogIn extends JFrame {
         this.setLocationRelativeTo(null);
     }
 
-    public static void main(java.lang.String[] args) {
+    public static void main(String[] args) {
         new LogIn();
     }
 
@@ -98,13 +104,16 @@ public class LogIn extends JFrame {
         登录按钮监听器，进行登录操作
          */
         loginButton.addActionListener(e -> {
-            if (!"".equals(userText.getText()) && !"".equals(java.lang.String.valueOf(passwordText.getPassword()))) {
-                java.lang.String userName = userText.getText();
-                java.lang.String password = java.lang.String.valueOf(passwordText.getPassword());
-                if (manager.login(userName, password) != null) {
+            if (!"".equals(userText.getText()) && !"".equals(String.valueOf(passwordText.getPassword()))) {
+                String userName = userText.getText();
+                String password = String.valueOf(passwordText.getPassword());
+                if (identity[0].equals(manager.login(userName, password))) {
                     JOptionPane.showMessageDialog(null, "登录成功！");
                     dispose();
-                    new MainMenu(manager.login(userName, password));
+                    new MainMenu();
+                } else if (identity[2].equals(manager.login(userName, password))) {
+                    JOptionPane.showMessageDialog(null, "账号被冻结！请咨询管理员以获得更多信息。");
+                    passwordText.setText("");
                 } else {
                     JOptionPane.showMessageDialog(null, "密码错误，请重试！");
                     passwordText.setText("");
@@ -207,14 +216,73 @@ public class LogIn extends JFrame {
         注册按钮监听器，进行注册
          */
         loginButton.addActionListener(e -> {
-            java.lang.String userName = userText.getText();
-            java.lang.String password = java.lang.String.valueOf(jPasswordField.getPassword());
+            String userName = userText.getText();
+            String password = String.valueOf(jPasswordField.getPassword());
             if (manager.register(userName, password)) {
                 JOptionPane.showMessageDialog(null, "注册成功！");
                 dispose();
-                new MainMenu(userName);
+                new MainMenu();
             }
         });
         return registerPanel;
+    }
+
+    protected JComponent makeAdminLogInPanel() {
+        JPanel adminLogInPanel = new JPanel();
+        adminLogInPanel.setLayout(null);
+
+
+        /*
+        用户名模块
+         */
+        JLabel userLabel = new JLabel("用户名:");
+        userLabel.setFont(fo);
+        userLabel.setBounds(38, 20, 80, 25);
+        adminLogInPanel.add(userLabel);
+        JTextField userText = new JTextField(20);
+        userText.setBounds(100, 20, 165, 25);
+        adminLogInPanel.add(userText);
+
+        /*
+        密码模块
+         */
+        JLabel passwordLabel = new JLabel("密码:");
+        passwordLabel.setFont(fo);
+        passwordLabel.setBounds(55, 60, 80, 25);
+        adminLogInPanel.add(passwordLabel);
+        JPasswordField passwordText = new JPasswordField(20);
+        passwordText.setBounds(100, 60, 165, 25);
+        adminLogInPanel.add(passwordText);
+
+
+        /*
+        登录按钮
+         */
+        JButton loginButton = new JButton("登录");
+        loginButton.setFont(new Font("宋体", Font.BOLD, 18));
+        loginButton.setBounds(130, 110, 80, 25);
+        adminLogInPanel.add(loginButton);
+
+
+        /*
+        登录按钮监听器，进行登录操作
+         */
+        loginButton.addActionListener(e -> {
+            if (!"".equals(userText.getText()) && !"".equals(String.valueOf(passwordText.getPassword()))) {
+                String userName = userText.getText();
+                String password = String.valueOf(passwordText.getPassword());
+                if (identity[1].equals(manager.login(userName, password))) {
+                    JOptionPane.showMessageDialog(null, "登录成功！");
+                    dispose();
+                    new AdminPanel();
+                } else {
+                    JOptionPane.showMessageDialog(null, "密码错误，请重试！");
+                    passwordText.setText("");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "账号密码不能为空！");
+            }
+        });
+        return adminLogInPanel;
     }
 }

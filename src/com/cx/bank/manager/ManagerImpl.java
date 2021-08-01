@@ -4,8 +4,11 @@ package com.cx.bank.manager;
 import com.cx.bank.dao.SqlDaoImpl;
 import com.cx.bank.factory.UserDaoFactory;
 import com.cx.bank.model.MoneyBean;
+import com.cx.bank.model.UserBean;
 import com.cx.bank.util.AccountOverDrawnException;
 import com.cx.bank.util.InvalidDepositException;
+
+import java.util.HashMap;
 
 /**
  * @ClassName ManagerImpl
@@ -27,6 +30,14 @@ public class ManagerImpl implements ManagerInterface {
      * 钱包对象
      */
     MoneyBean moneyBean = new MoneyBean();
+    /**
+     * 用户信息对象
+     */
+    UserBean userBean = new UserBean();
+    /**
+     * 查询到的userBean
+     */
+    UserBean selectedUser = new UserBean();
     /**
      * 创建UserDaoFactory单例
      */
@@ -54,6 +65,7 @@ public class ManagerImpl implements ManagerInterface {
      */
     @Override
     public double inquiry() {
+        bdi.log("inquiry", moneyBean.getMoney(), userBean.getUserId());
         return moneyBean.getMoney();
     }
 
@@ -72,6 +84,7 @@ public class ManagerImpl implements ManagerInterface {
             if (amount > moneyBean.getMoney()) {
                 throw new AccountOverDrawnException("余额不足！");
             } else {
+                bdi.log("withdrawals", amount, userBean.getUserId());
                 moneyBean.setMoney(moneyBean.getMoney() - amount);
             }
         }
@@ -87,6 +100,7 @@ public class ManagerImpl implements ManagerInterface {
         if (amount < 0) {
             throw new InvalidDepositException("请输入正确的金额！");
         } else {
+            bdi.log("deposit", amount, userBean.getUserId());
             moneyBean.setMoney(moneyBean.getMoney() + amount);
         }
     }
@@ -106,6 +120,7 @@ public class ManagerImpl implements ManagerInterface {
             if (amount > moneyBean.getMoney()) {
                 throw new AccountOverDrawnException("余额不足！");
             } else {
+                bdi.log("transfer to " + name, amount, userBean.getUserId());
                 moneyBean.setMoney(moneyBean.getMoney() - amount);
             }
         }
@@ -114,22 +129,13 @@ public class ManagerImpl implements ManagerInterface {
 
     /**
      * 退出系统
-     *
-     * @param userName 用户名
-     */
-    @Override
-    public void exitSystem(String userName) {
-        bdi.saveMoney(moneyBean, userName);
-        System.exit(0);
-    }
-
-    /**
-     * 重载一个没有参数的退出方法。
      */
     @Override
     public void exitSystem() {
+        bdi.saveMoney(moneyBean, userBean.getUserName());
         System.exit(0);
     }
+
 
     /**
      * 注册账号
@@ -167,10 +173,51 @@ public class ManagerImpl implements ManagerInterface {
      */
     @Override
     public String login(String name, String password) {
+        userBean = bdi.findUser(name, password);
+        if (userBean == null) {
+            return null;
+        }
+        if (userBean.isAdmin()) {
+            return "ADMIN";
+        }
+        if (userBean.getUserFlag() == 0) {
+            return "FROZEN";
+        }
         if (!flag) {
             moneyBean.setMoney(bdi.getMoney(name));
             flag = true;
         }
-        return bdi.findUser(name, password);
+        return "USER";
+    }
+
+    /**
+     * 获取用户信息
+     *
+     * @param id 用户编号
+     * @return 用户信息表
+     */
+    @Override
+    public HashMap<String, Object> getInfo(int id) {
+        HashMap<String, Object> selectedUserMap = new HashMap<>();
+        selectedUser = bdi.findById(id);
+        if (selectedUser.getUserFlag() == 1) {
+            selectedUserMap.put("userFlag", "正常");
+        } else {
+            selectedUserMap.put("userFlag", "冻结");
+        }
+        selectedUserMap.put("username", selectedUser.getUserName());
+        selectedUserMap.put("userId", selectedUser.getUserId());
+        selectedUserMap.put("admin", selectedUser.isAdmin());
+        return selectedUserMap;
+    }
+
+    /**
+     * 改变用户状态
+     *
+     * @param id 用户编号
+     */
+    @Override
+    public void changeStatus(int id) {
+        bdi.setStatus(id, selectedUser.getUserFlag());
     }
 }

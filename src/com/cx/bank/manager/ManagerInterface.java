@@ -3,6 +3,8 @@ package com.cx.bank.manager;
 import com.cx.bank.util.AccountOverDrawnException;
 import com.cx.bank.util.InvalidDepositException;
 
+import java.util.HashMap;
+
 /**
  * @ClassName ManagerInterface
  * @Description 声明业务层方法
@@ -47,16 +49,9 @@ public interface ManagerInterface {
     boolean transfer(String name, double amount) throws InvalidDepositException, AccountOverDrawnException;
 
     /**
-     * 重载一个没有参数的退出方法。
+     * 退出系统
      */
     void exitSystem();
-
-    /**
-     * 退出系统
-     *
-     * @param userName 用户名
-     */
-    void exitSystem(String userName);
 
     /**
      * 注册账号
@@ -80,7 +75,22 @@ public interface ManagerInterface {
      *
      * @param name     用户输入的姓名
      * @param password 用户输入的密码
-     * @return 用户对象
+     * @return 用户的身份
      */
     String login(String name, String password);
+
+    /**
+     * 获取用户信息
+     *
+     * @param id 用户编号
+     * @return 用户信息表
+     */
+    HashMap<String, Object> getInfo(int id);
+
+    /**
+     * 改变用户状态
+     *
+     * @param id 用户编号
+     */
+    void changeStatus(int id);
 }

@@ -39,12 +39,11 @@ public class MainMenu extends JFrame implements ActionListener {
      */
     JLabel jLabel1, jLabel2;
 
-    MainMenu(String userName) {
+    MainMenu() {
         /*
         参数设置
          */
         super("银行管理系统");
-        this.userName = userName;
         this.setSize(630, 290);
         this.setLocationRelativeTo(null);
         this.setLayout(null);
@@ -129,7 +128,7 @@ public class MainMenu extends JFrame implements ActionListener {
             transfer();
         }
         if (exit.equals(e.getSource())) {
-            manager.exitSystem(userName);
+            manager.exitSystem();
         }
     }
 
@@ -223,7 +222,7 @@ public class MainMenu extends JFrame implements ActionListener {
                     throw new InvalidDepositException("请输入正确的金额！");
                 } else {
                     manager.deposit(Double.parseDouble(moneyField.getText()));
-                    JOptionPane.showMessageDialog(null, "存款成功！" + "您的余额为：" + manager.inquiry() + "元");
+                    JOptionPane.showMessageDialog(null, "存款成功！");
                     deposit.dispose();
                 }
             } catch (InvalidDepositException invalidDepositException) {
@@ -272,7 +271,7 @@ public class MainMenu extends JFrame implements ActionListener {
             try {
                 if (manager.login(userName, password) != null) {
                     manager.withdrawals(Double.parseDouble(moneyField.getText()));
-                    JOptionPane.showMessageDialog(null, "取款成功！您的余额为：" + manager.inquiry() + "元");
+                    JOptionPane.showMessageDialog(null, "取款成功！");
                     withdrawals.dispose();
                 } else {
                     JOptionPane.showMessageDialog(null, "账号密码错误！");

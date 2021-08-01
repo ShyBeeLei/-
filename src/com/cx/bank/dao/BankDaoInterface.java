@@ -1,6 +1,7 @@
 package com.cx.bank.dao;
 
 import com.cx.bank.model.MoneyBean;
+import com.cx.bank.model.UserBean;
 
 /**
  * @ClassName BankDaoInterface
@@ -48,9 +49,9 @@ public interface BankDaoInterface {
      *
      * @param name     用户名
      * @param password 密码
-     * @return 是否成功
+     * @return 用户对象
      */
-    String findUser(String name, String password);
+    UserBean findUser(String name, String password);
 
     /**
      * 获取余额信息
@@ -59,4 +60,29 @@ public interface BankDaoInterface {
      * @return 得到用户余额
      */
     double getMoney(String userName);
+
+    /**
+     * 通过id查找用户信息
+     *
+     * @param id 用户编号
+     * @return 用户对象
+     */
+    UserBean findById(int id);
+
+    /**
+     * 改变用户状态
+     *
+     * @param id     用户编号
+     * @param status 用户状态
+     */
+    void setStatus(int id, int status);
+
+    /**
+     * 记录信息
+     *
+     * @param logType 进行的操作
+     * @param amount  操作的数额
+     * @param id      用户编号
+     */
+    void log(String logType, Double amount, int id);
 }

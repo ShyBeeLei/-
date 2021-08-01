@@ -2,6 +2,7 @@
 package com.cx.bank.dao;
 
 import com.cx.bank.model.MoneyBean;
+import com.cx.bank.model.UserBean;
 import com.cx.bank.util.MD5;
 
 import java.sql.Connection;
@@ -21,6 +22,10 @@ public class SqlDaoImpl extends BaseDao implements BankDaoInterface {
      * 加密
      */
     static MD5 md5 = new MD5();
+    /**
+     * 用户信息
+     */
+    UserBean userBean = new UserBean();
     /**
      * 数据库连接
      */
@@ -133,16 +138,20 @@ public class SqlDaoImpl extends BaseDao implements BankDaoInterface {
      * @return 是否成功
      */
     @Override
-    public String findUser(String name, String password) {
+    public UserBean findUser(String name, String password) {
         connection = getConnection();
         try {
-            preparedStatement = connection.prepareStatement("select user_name from user.t_user where user_name =? and user_password =?");
+            preparedStatement = connection.prepareStatement("select user_name,Admin,user_flag,user_id from user.t_user where user_name =? and user_password =?");
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, md5.encode(password.getBytes()));
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                return resultSet.getString("user_name");
+                userBean.setUserName(resultSet.getString("user_name"));
+                userBean.setAdmin(resultSet.getBoolean("Admin"));
+                userBean.setUserFlag(resultSet.getInt("user_flag"));
+                userBean.setUserId(resultSet.getInt("user_id"));
             }
+            return userBean;
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -171,6 +180,76 @@ public class SqlDaoImpl extends BaseDao implements BankDaoInterface {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    /**
+     * 通过id查找用户信息
+     *
+     * @param id 用户编号
+     * @return 用户对象
+     */
+    @Override
+    public UserBean findById(int id) {
+        connection = getConnection();
+        try {
+            preparedStatement = connection.prepareStatement("select user_name,user_flag from user.t_user where user_id=?");
+            preparedStatement.setInt(1, id);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                userBean.setUserName(resultSet.getString("user_name"));
+                userBean.setUserFlag(resultSet.getInt("user_flag"));
+            }
+            return userBean;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 改变用户状态
+     *
+     * @param id     用户编号
+     * @param status 用户状态
+     */
+    @Override
+    public void setStatus(int id, int status) {
+        connection = getConnection();
+        if (status == 0) {
+            status = 1;
+        } else {
+            status = 0;
+        }
+        try {
+            preparedStatement = connection.prepareStatement("update user.t_user set user_flag=? where user_id=?");
+            preparedStatement.setInt(1, status);
+            preparedStatement.setInt(2, id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 记录信息
+     *
+     * @param logType 进行的操作
+     * @param amount  操作的数额
+     * @param id      用户编号
+     */
+    @Override
+    public void log(String logType, Double amount, int id) {
+        connection = getConnection();
+        try {
+            preparedStatement = connection.prepareStatement("insert into user.t_log(log_id, log_type, log_amount, userid) values (?,?,?,?)");
+            preparedStatement.setInt(1, 0);
+            preparedStatement.setString(2, logType);
+            preparedStatement.setDouble(3, amount);
+            preparedStatement.setInt(4, id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
 
