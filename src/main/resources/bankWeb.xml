@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <context:component-scan base-package="com.cx.bank.controller"/>
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/Bank/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="com.cx.bank.interceptor.VerifyLoginInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!--只跳转，不需要进行处理的时候使用-->
+    <mvc:view-controller path="/" view-name="Login"/>
+    <mvc:view-controller path="/register" view-name="Register"/>
+    <mvc:view-controller path="/Deposit" view-name="Deposit"/>
+    <mvc:view-controller path="/Transfer" view-name="Transfer"/>
+    <mvc:view-controller path="/Withdrawals" view-name="Withdrawals"/>
+    <!--开放对静态资源的访问(若当前servlet无法处理，便交予默认servlet处理)-->
+    <mvc:default-servlet-handler/>
+
+    <!---开启mvc注解驱动(必写)-->
+    <mvc:annotation-driven/>
+
+</beans>

@@ -3,6 +3,9 @@
   <component name="WebContextManager">
     <option name="state">
       <map>
+        <entry key="file://$PROJECT_DIR$/src/main/web/AdminMenu.jsp" value="file://$PROJECT_DIR$/src/main/web" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/Bank/Deposit.jsp" value="file://$PROJECT_DIR$/src/main/webapp" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/WEB-INF/Bank/MainMenu.jsp" value="file://$PROJECT_DIR$/src/main/webapp" />
         <entry key="file://$PROJECT_DIR$/web/AdminMenu.jsp" value="file://$PROJECT_DIR$/web" />
         <entry key="file://$PROJECT_DIR$/web/LogIn.jsp" value="file://$PROJECT_DIR$/web" />
         <entry key="file://$PROJECT_DIR$/web/Register.jsp" value="file://$PROJECT_DIR$/web" />

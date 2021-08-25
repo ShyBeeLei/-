@@ -26,7 +26,6 @@ public class BaseDao {
      * 连接对象
      */
     Connection connection = null;
-    ResultSet resultSet = null;
 
     protected Connection getConnection() {
         try {
