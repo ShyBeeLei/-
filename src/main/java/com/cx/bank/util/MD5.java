@@ -1,5 +1,7 @@
 package com.cx.bank.util;
 
+import org.springframework.stereotype.Component;
+
 /**
  * @ClassName MD5
  * @Description 对密码进行加密
@@ -7,6 +9,7 @@ package com.cx.bank.util;
  * @Date 2021/7/16 17:38
  * @Version 1.0
  */
+@Component
 public class MD5 {
     public String encode(byte[] source) {
 

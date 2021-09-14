@@ -1,18 +1,21 @@
 package com.cx.bank.controller;
 
-import com.cx.bank.manager.ManagerImpl;
-import com.cx.bank.model.UserBean;
-import com.cx.bank.util.AccountOverDrawnException;
-import com.cx.bank.util.InvalidDepositException;
-import org.json.JSONObject;
-import org.springframework.stereotype.Controller;
+import com.cx.bank.constant.BankConstant;
+import com.cx.bank.entity.UserEntity;
+import com.cx.bank.exception.AccountOverDrawnException;
+import com.cx.bank.exception.InvalidDepositException;
+import com.cx.bank.exception.UserNotExistException;
+import com.cx.bank.exception.WrongPasswordException;
+import com.cx.bank.service.Impl.ManagerServiceImpl;
+import com.cx.bank.service.ManagerService;
+import com.cx.bank.util.MD5;
+import com.cx.bank.util.R;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * @ClassName ManagerController
@@ -21,80 +24,68 @@ import java.util.List;
  * @Date 2021/8/22 14:41
  * @Version 1.0
  */
-@Controller
+@RestController
+@RequestMapping("SoulBank")
 public class ManagerController {
-    ManagerImpl manager = ManagerImpl.getInstance();
+    final
+    ManagerService manager;
 
-    @RequestMapping(value = "/inquiry", method = RequestMethod.GET)
-    public void inquiry(String password, HttpSession session, HttpServletResponse response) throws IOException {
-        UserBean user = (UserBean) session.getAttribute("userBean");
-        System.out.println(user.getPassword() + "," + password);
-        if (user.getPassword().equals(password)) {
-            double balance = manager.inquiry(password);
-            response.getWriter().write("您的余额为：" + balance);
+    final
+    MD5 md5;
+
+    public ManagerController(ManagerServiceImpl manager, MD5 md5) {
+        this.manager = manager;
+        this.md5 = md5;
+    }
+
+    @GetMapping(value = "/inquiry")
+    public R inquiry(UserEntity user, HttpSession session) throws WrongPasswordException {
+        UserEntity userEntity = (UserEntity) session.getAttribute("user");
+        if (userEntity.getPassword().equals(md5.getMD5(user.getPassword()))) {
+            double balance = manager.inquiry(userEntity);
+            return R.ok().put("data", balance);
         } else {
-            response.getWriter().write("密码错误！请重试!");
+            throw new WrongPasswordException();
         }
     }
 
-    @RequestMapping(value = "/deposit", method = RequestMethod.POST)
-    public void deposit(double amount, HttpServletResponse response) throws IOException {
-        try {
-            manager.deposit(amount);
-            response.getWriter().write("存款成功！");
-        } catch (InvalidDepositException e) {
-            response.getWriter().write(e.getMessage());
-        }
+    @PostMapping(value = "/deposit")
+    public R deposit(double amount, HttpSession session) throws InvalidDepositException {
+        UserEntity userEntity = (UserEntity) session.getAttribute("user");
+        manager.deposit(userEntity, amount);
+        return R.ok().put("msg", "存款成功！");
+
     }
 
-    @RequestMapping(value = "/withdrawals", method = RequestMethod.POST)
-    public void withdrawals(double amount, String password, HttpServletResponse response, HttpSession session) throws IOException {
-        UserBean user = (UserBean) session.getAttribute("userBean");
-        if (password.equals(user.getPassword())) {
-            try {
-                manager.withdrawals(amount);
-                response.getWriter().write("取款成功！");
-            } catch (InvalidDepositException | AccountOverDrawnException e) {
-                response.getWriter().write(e.getMessage());
-            }
+    @PostMapping(value = "/withdrawals")
+    public R withdrawals(UserEntity user, double amount, HttpSession session) throws InvalidDepositException, AccountOverDrawnException, WrongPasswordException {
+        UserEntity userEntity = (UserEntity) session.getAttribute("user");
+        if (userEntity.getPassword().equals(md5.getMD5(user.getPassword()))) {
+            manager.withdrawals(userEntity, amount);
+            return R.ok().put("msg", "取款成功！");
         } else {
-            response.getWriter().write("密码错误！请重试。");
+            throw new WrongPasswordException();
         }
     }
 
-    @RequestMapping(value = "/transfer", method = RequestMethod.POST)
-    public void transfer(String targetUser, String password, double amount, HttpServletResponse response, HttpSession session) throws IOException {
-        UserBean user = (UserBean) session.getAttribute("userBean");
-        try {
-            if (password.equals(user.getPassword())) {
-                manager.transfer(targetUser, amount);
-                response.getWriter().write("转账成功");
-            } else {
-                response.getWriter().write("密码错误！请重试。");
-            }
-        } catch (InvalidDepositException | AccountOverDrawnException e) {
-            response.getWriter().write(e.getMessage());
-        }
-    }
-
-    @RequestMapping("/getUsers")
-    public void getUsers(HttpServletResponse response) throws IOException {
-        List<UserBean> users = manager.getUsers();
-        JSONObject obj = new JSONObject();
-        obj.put("code", 0);
-        obj.put("msg", "");
-        obj.put("count", users.size());
-        obj.put("data", users);
-        response.getWriter().write(obj.toString());
-    }
-
-    @RequestMapping(value = "/changeStatus", method = RequestMethod.POST)
-    public void changeStatus(int id, int status, HttpServletResponse response) throws IOException {
-        manager.changeStatus(id, status);
-        if (status == 1) {
-            response.getWriter().write("冻结成功！");
+    @PostMapping(value = "/transfer")
+    public R transfer(String targetUser, UserEntity user, double amount, HttpSession session) throws InvalidDepositException, AccountOverDrawnException, WrongPasswordException, UserNotExistException {
+        UserEntity userEntity = (UserEntity) session.getAttribute("user");
+        if (userEntity.getPassword().equals(md5.getMD5(user.getPassword()))) {
+            manager.transfer(userEntity, targetUser, amount);
+            return R.ok().put("msg", "转账成功！");
         } else {
-            response.getWriter().write("激活成功！");
+            throw new WrongPasswordException();
+        }
+    }
+
+    @PostMapping(value = "/changeStatus")
+    public R changeStatus(UserEntity user) {
+        manager.changeStatus(user);
+        if (user.getStatus() == BankConstant.status.ACTIVE.getCode()) {
+            return R.ok().put("msg", "冻结成功！");
+        } else {
+            return R.ok().put("msg", "激活成功！");
         }
     }
 }

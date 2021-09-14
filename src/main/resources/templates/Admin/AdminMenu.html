@@ -1,0 +1,147 @@
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="//unpkg.com/layui@2.6.8/dist/css/layui.css" media="all">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>枝江银行</title>
+    <style>
+        html {
+            height: 100%;
+            width: 100%;
+            background-image: linear-gradient(141deg, #9199be 0%, #345bb9 51%, #7836e3 75%);
+            opacity: 0.75;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header layui-bg-cyan">
+        <div class="layui-logo">SOULBANK</div>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:">
+                    <img class="layui-nav-img" th:src="@{/img/AvA.JPG}">
+                    <span>顶碗大魔王</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-blue">
+        <ul class="layui-nav layui-nav-tree layui-bg-blue">
+            <li class="layui-nav-item layui-this"><a href="javascript:">管理用户</a></li>
+            <li class="layui-nav-item"><a th:href="@{Logs}">查看日志</a></li>
+            <li class="layui-nav-item"><a th:href="@{/}">退出登录</a></li>
+        </ul>
+    </div>
+    <div class="layui-body">
+        <div class="layui-bg-gray" style="padding: 20px">
+            <div class="layui-container">
+                <div class="layui-col-md1">
+                    <label class="layui-form-label" for="searchValue">
+                        用户名：
+                    </label>
+                </div>
+                <div class="layui-col-md9">
+                    <input class="layui-input" id="searchValue" placeholder="请输入您要操作的用户"/>
+                </div>
+                <button data-type="reload" class="layui-btn" id="search" style="margin-left: 10px;">提交查询
+                </button>
+            </div>
+        </div>
+        <table class="layui-hide" id="user" lay-filter="user"></table>
+    </div>
+    <div class="layui-footer">
+        广告位招租
+    </div>
+</div>
+
+
+<script id="bar" type="text/html">
+    <a class="layui-btn layui-btn-xs" lay-event="activate">激活</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="freeze">冻结</a>
+</script>
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="//unpkg.com/layui@2.6.8/dist/layui.js"></script>
+<script type="text/javascript">
+    layui.use('table', function () {
+        let table = layui.table;
+
+        /**
+         * 创建表单
+         */
+        table.render({
+            elem: '#user'
+            , height: 650
+            , url: '/ajax/getUsers' //数据接口
+            , page: true //开启分页
+            , cols: [
+                [ //表头
+                    {field: 'id', title: '用户编号', width: '25%', sort: true}
+                    , {field: 'username', title: '用户名', width: '20%', sort: true}
+                    , {field: 'identity', title: '用户身份', width: '20%', sort: true}
+                    , {field: 'status', title: '用户状态', width: '25%', sort: true}
+                    , {fixed: 'right', title: '操作', toolbar: '#bar', width: '10%'}
+                ]
+            ]
+            , id: 'user'
+        });
+
+        /**
+         *实现搜索功能
+         */
+        let $ = layui.jquery;
+
+        $(document).on('click', "#search", function (data) {
+            let searchText = $('#searchValue');
+            table.reload('user', {
+                where: {
+                    key: searchText.val()
+                },
+                page: {
+                    curr: 1
+                }
+            })
+        });
+
+        /**
+         * 实现工具栏功能
+         */
+        table.on('tool(user)', function (obj) {
+            let user = obj.data;
+            let flag;
+            let status;
+            if (user.status === 0) {
+                status = "activate"
+                flag = 1
+            } else {
+                status = "freeze"
+                flag = 0
+            }
+            if (obj.event === status) {
+                layer.alert('请勿重复操作!', {
+                    time: 20000
+                    , btn: '好的'
+                })
+            } else {
+                $.ajax({
+                    url: "/SoulBank/changeStatus"
+                    , data: user
+                    , type: "POST"
+                    , success: function (result) {
+                        layer.alert(result.msg, function (index) {
+                            obj.update({
+                                status: flag
+                            })
+                            layer.close(index)
+                        });
+                    }
+                })
+            }
+        });
+    });
+</script>
+</body>
+</html>

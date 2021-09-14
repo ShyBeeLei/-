@@ -1,17 +1,20 @@
 
 package com.cx.bank.controller;
 
-import com.cx.bank.manager.ManagerImpl;
-import com.cx.bank.model.UserBean;
+import com.cx.bank.entity.UserEntity;
+import com.cx.bank.exception.UserFrozenException;
+import com.cx.bank.exception.UserNameExistedException;
+import com.cx.bank.exception.UserUnauthorizedException;
+import com.cx.bank.exception.WrongPasswordException;
+import com.cx.bank.service.UserService;
+import com.cx.bank.util.MD5;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 
 /**
  * @ClassName LoginController
@@ -22,76 +25,46 @@ import java.io.IOException;
  */
 @Controller
 public class LoginController {
-    ManagerImpl manager = ManagerImpl.getInstance();
+    final
+    UserService userService;
+    final
+    MD5 md5;
 
-    @RequestMapping(value = "/MainMenu", method = RequestMethod.GET)
-    public String toInquiry() {
-        return "MainMenu";
+    public LoginController(UserService userService, MD5 md5) {
+        this.userService = userService;
+        this.md5 = md5;
     }
 
-    @RequestMapping(value = "/MainMenu", method = RequestMethod.POST)
-    public ModelAndView login(UserBean user, String loginAsAdmin, String remember, HttpSession session, HttpServletResponse resp) {
-        ModelAndView mov = new ModelAndView();
-        String errorInfo = null;
-        String username = user.getUsername();
-        String password = user.getPassword();
-        System.out.println(username + "," + password);
-        boolean flag = loginAsAdmin != null;
-        session.setAttribute("userBean", user);
-        if (remember != null) {
-            Cookie cookie1 = new Cookie("username", username);
-            Cookie cookie2 = new Cookie("password", password);
-            cookie1.setMaxAge(2000);
-            cookie2.setMaxAge(2000);
-            resp.addCookie(cookie1);
-            resp.addCookie(cookie2);
-        }
-        String identity = manager.login(username, password, flag);
-        System.out.println(identity);
-        if (identity != null) {
-            if ("FROZEN".equals(identity)) {
-                errorInfo = "账号被冻结！详情请咨询本站管理员。";
-                mov.setViewName("redirect:/");
-            } else if ("ADMIN".equals(identity)) {
-                mov.setViewName("AdminMenu");
-            } else if ("USER".equals(identity) && flag) {
-                errorInfo = "您不是管理员！";
-                mov.setViewName("redirect:/");
-            } else {
-                mov.setViewName("MainMenu");
-            }
-        } else {
-            errorInfo = "账号密码错误！";
-            mov.setViewName("redirect:/");
-        }
-        mov.addObject("errorInfo", errorInfo);
-        return mov;
+
+    @RequestMapping(value = {"/", "/login"})
+    public String login(HttpSession session) {
+        session.invalidate();
+        return "Login";
     }
 
-    @RequestMapping(value = "/MainMenu", method = RequestMethod.PUT)
-    public ModelAndView register(UserBean user, HttpSession session) {
-        ModelAndView modelAndView = new ModelAndView();
-        String username = user.getUsername();
-        String password = user.getPassword();
-        session.setAttribute("userBean", user);
-        if (manager.register(username, password)) {
-            modelAndView.setViewName("MainMenu");
-        } else {
-            modelAndView.addObject("errorInfo", "用户名重复！");
-            modelAndView.setViewName("redirect:/register");
-        }
-        return modelAndView;
+    @GetMapping(value = {"/register"})
+    public String register() {
+        return "Register";
     }
 
-    @RequestMapping("/verifyUsername")
-    public void verifyUsername(String username, HttpServletResponse response) throws IOException {
-        if (manager.verifyUserName(username)) {
-            //用户名重复
-            response.getWriter().write("true");
-        } else {
-            //无重复
-            response.getWriter().write("false");
+    @PostMapping(value = "/MainMenu")
+    public String login(UserEntity user, HttpSession session) throws UserFrozenException, UserUnauthorizedException, WrongPasswordException {
+        String md5 = this.md5.getMD5(user.getPassword());
+        user.setPassword(md5);
+        session.setAttribute("user", user);
+        userService.login(user);
+        if (user.getIdentity() == 1) {
+            return "redirect:SoulBank/MainMenu";
         }
+        return "redirect:SoulBank/AdminMenu";
     }
 
+    @PutMapping(value = "/MainMenu")
+    public String register(UserEntity user, HttpSession session) throws UserNameExistedException {
+        String md5 = this.md5.getMD5(user.getPassword());
+        user.setPassword(md5);
+        session.setAttribute("user", user);
+        userService.register(user);
+        return "redirect:/SoulBank/MainMenu";
+    }
 }

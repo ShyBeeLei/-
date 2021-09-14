@@ -1,0 +1,106 @@
+<meta content="webkit" name="renderer">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<link href="//unpkg.com/layui@2.6.8/dist/css/layui.css" media="all" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>枝江银行</title>
+    <style>
+        html {
+            height: 100%;
+            width: 100%;
+            background-image: linear-gradient(141deg, #9199be 0%, #345bb9 51%, #7836e3 75%);
+            opacity: 0.75;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header layui-bg-cyan">
+        <div class="layui-logo">SOULBANK</div>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:">
+                    <img class="layui-nav-img" th:src="@{/img/AvA.JPG}">
+                    <span>顶碗大魔王</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-blue">
+        <ul class="layui-nav layui-nav-tree layui-bg-blue">
+            <li class="layui-nav-item"><a th:href="@{AdminMenu}">管理用户</a></li>
+            <li class="layui-nav-item layui-this"><a href="javascript:">查看日志</a></li>
+            <li class="layui-nav-item"><a th:href="@{/}">退出登录</a></li>
+        </ul>
+    </div>
+    <div class="layui-body">
+        <div class="layui-bg-gray" style="padding: 20px">
+            <div class="layui-container">
+                <div class="layui-col-md1">
+                    <label class="layui-form-label" for="searchValue">
+                        用户名：
+                    </label>
+                </div>
+                <div class="layui-col-md9">
+                    <input class="layui-input" id="searchValue" placeholder="请输入您要操作的用户"/>
+                </div>
+                <button class="layui-btn" data-type="reload" id="search" style="margin-left: 10px;">搜索
+                </button>
+            </div>
+        </div>
+        <table class="layui-hide" id="Log" lay-filter="log"></table>
+    </div>
+    <div class="layui-footer">
+        广告位招租
+    </div>
+</div>
+
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="//unpkg.com/layui@2.6.8/dist/layui.js"></script>
+<script type="text/javascript">
+    layui.use('table', function () {
+        let table = layui.table;
+
+        /**
+         * 创建表单
+         */
+        table.render({
+            elem: '#Log'
+            , height: 650
+            , url: '/ajax/getLogs' //数据接口
+            , page: true //开启分页
+            , cols: [
+                [ //表头
+                    {field: 'id', title: '日志编号', width: '20%', sort: true}
+                    , {field: 'type', title: '操作类型', width: '15%', sort: true}
+                    , {field: 'amount', title: '操作金额', width: '20%', sort: true}
+                    , {field: 'userId', title: '操作用户', width: '20%', sort: true}
+                    , {field: 'date', title: '操作日期', width: '25%', sort: true}
+                ]
+            ]
+            , id: 'log'
+        });
+
+        /**
+         *实现搜索功能
+         */
+        let $ = layui.jquery;
+
+        $(document).on('click', "#search", function (data) {
+            let searchText = $('#searchValue');
+            table.reload('log', {
+                where: {
+                    key: searchText.val()
+                },
+                page: {
+                    curr: 1
+                }
+            })
+        });
+    })
+</script>
+</body>
+</html>
