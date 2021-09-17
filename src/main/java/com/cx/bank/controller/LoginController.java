@@ -51,8 +51,8 @@ public class LoginController {
     public String login(UserEntity user, HttpSession session) throws UserFrozenException, UserUnauthorizedException, WrongPasswordException {
         String md5 = this.md5.getMD5(user.getPassword());
         user.setPassword(md5);
-        session.setAttribute("user", user);
         userService.login(user);
+        session.setAttribute("user", user);
         if (user.getIdentity() == 1) {
             return "redirect:SoulBank/MainMenu";
         }

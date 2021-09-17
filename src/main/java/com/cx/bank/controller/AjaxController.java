@@ -1,14 +1,23 @@
 package com.cx.bank.controller;
 
+import com.cx.bank.entity.UserEntity;
+import com.cx.bank.entity.UserHeaderEntity;
 import com.cx.bank.exception.UserNameExistedException;
 import com.cx.bank.exception.UserNotExistException;
+import com.cx.bank.exception.WrongPasswordException;
 import com.cx.bank.service.LogService;
 import com.cx.bank.service.UserService;
+import com.cx.bank.util.MD5;
 import com.cx.bank.util.PageUtils;
 import com.cx.bank.util.R;
+import com.cx.bank.vo.PasswordVo;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpSession;
+import java.util.Objects;
 
 /**
  * @ClassName AjaxController
@@ -26,9 +35,13 @@ public class AjaxController {
     final
     LogService logService;
 
-    public AjaxController(UserService userService, LogService logService) {
+    final
+    MD5 md5;
+
+    public AjaxController(UserService userService, LogService logService, MD5 md5) {
         this.userService = userService;
         this.logService = logService;
+        this.md5 = md5;
     }
 
     @GetMapping("/verifyUsername")
@@ -47,5 +60,37 @@ public class AjaxController {
     public R getLogs(String key) {
         PageUtils logs = logService.getLogs(key);
         return R.ok().put("data", logs.getList()).put("count", logs.getTotalCount());
+    }
+
+    @GetMapping("/getHead")
+    public R getHead(HttpSession session) {
+        UserEntity user = (UserEntity) session.getAttribute("user");
+        UserHeaderEntity userHeaderEntity = userService.getHeaderInfo(user);
+        return R.ok().put("data", userHeaderEntity);
+    }
+
+    @GetMapping("/Info")
+    public R getInfo(String username) {
+        UserEntity user = userService.getDetailInfo(username);
+        return R.ok().put("data", user);
+    }
+
+    @PostMapping("/password")
+    public R changePassword(PasswordVo passwordVo, HttpSession session) throws WrongPasswordException {
+        if (session.isNew()) {
+            return R.error("请先登录！");
+        } else {
+            UserEntity user = (UserEntity) session.getAttribute("user");
+            String username = user.getUsername();
+
+            if (!Objects.equals(passwordVo.getNewPassword(), passwordVo.getNewPassword2())) {
+                return R.error("密码不一致！");
+            } else {
+                passwordVo.setOldPassword(md5.getMD5(passwordVo.getOldPassword()));
+                passwordVo.setNewPassword2(md5.getMD5(passwordVo.getNewPassword2()));
+                userService.changePassword(username, passwordVo);
+                return R.ok("修改成功！");
+            }
+        }
     }
 }

@@ -6,10 +6,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cx.bank.constant.BankConstant;
 import com.cx.bank.dao.UserDao;
+import com.cx.bank.dao.UserHeaderDao;
 import com.cx.bank.entity.UserEntity;
+import com.cx.bank.entity.UserHeaderEntity;
 import com.cx.bank.exception.*;
 import com.cx.bank.service.UserService;
 import com.cx.bank.util.PageUtils;
+import com.cx.bank.vo.PasswordVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -24,6 +27,13 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements UserService {
+    final
+    UserHeaderDao headerDao;
+
+    public UserServiceImpl(UserHeaderDao headerDao) {
+        this.headerDao = headerDao;
+    }
+
     /**
      * 处理登陆业务
      *
@@ -81,5 +91,27 @@ public class UserServiceImpl extends ServiceImpl<UserDao, UserEntity> implements
         }
         IPage<UserEntity> page = this.page(new Page<>(), wrapper);
         return new PageUtils(page);
+    }
+
+    @Override
+    public UserHeaderEntity getHeaderInfo(UserEntity user) {
+        UserHeaderEntity headerEntity = headerDao.selectOne(new QueryWrapper<UserHeaderEntity>().eq("user_name", user.getUsername()));
+        return headerEntity;
+    }
+
+    @Override
+    public UserEntity getDetailInfo(String username) {
+        UserEntity user = baseMapper.selectOne(new QueryWrapper<UserEntity>().eq("username", username));
+        return user;
+    }
+
+    @Override
+    public void changePassword(String username, PasswordVo passwordVo) throws WrongPasswordException {
+        UserEntity userEntity = baseMapper.selectOne(new QueryWrapper<UserEntity>().eq("username", username).eq("password", passwordVo.getOldPassword()));
+        if (userEntity != null) {
+            baseMapper.updatePassword(username, passwordVo.getNewPassword2());
+        } else {
+            throw new WrongPasswordException();
+        }
     }
 }

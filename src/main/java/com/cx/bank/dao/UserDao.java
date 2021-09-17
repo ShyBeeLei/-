@@ -37,4 +37,12 @@ public interface UserDao extends BaseMapper<UserEntity> {
      * @param code     要更新到的状态
      */
     void updateStatus(@Param("username") String username, @Param("code") int code);
+
+    /**
+     * 更新密码
+     *
+     * @param username     目标用户名
+     * @param newPassword2 新密码
+     */
+    void updatePassword(@Param("username") String username, @Param("newPassword2") String newPassword2);
 }

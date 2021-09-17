@@ -2,8 +2,10 @@ package com.cx.bank.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cx.bank.entity.UserEntity;
+import com.cx.bank.entity.UserHeaderEntity;
 import com.cx.bank.exception.*;
 import com.cx.bank.util.PageUtils;
+import com.cx.bank.vo.PasswordVo;
 
 /**
  * @ClassName LoginService
@@ -47,4 +49,28 @@ public interface UserService extends IService<UserEntity> {
      * @return 用户表
      */
     PageUtils getUsers(String key);
+
+    /**
+     * 获取用户头像与用户名
+     *
+     * @param user 用户实体
+     * @return 用户头像对象
+     */
+    UserHeaderEntity getHeaderInfo(UserEntity user);
+
+    /**
+     * 获取用户详细信息
+     *
+     * @param username 用户名
+     * @return 用户实体
+     */
+    UserEntity getDetailInfo(String username);
+
+    /**
+     * 修改成功方法
+     *
+     * @param username   用户名
+     * @param passwordVo 密码Vo类
+     */
+    void changePassword(String username, PasswordVo passwordVo) throws WrongPasswordException;
 }

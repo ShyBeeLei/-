@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Common</title>
+    <div th:fragment="CommonHead">
+        <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="//unpkg.com/layui@2.6.8/dist/layui.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    </div>
+</head>
+<body>
+<div class="layui-header layui-bg-cyan" id="header" th:fragment="CommonHeader">
+    <div class="layui-logo">SOULBANK</div>
+    <ul class="layui-nav layui-layout-right">
+        <li class="layui-nav-item">
+            <a href="javascript:">
+                <img :src="imgUrl" class="layui-nav-img">
+                <span v-text="username"></span>
+                <dl class="layui-nav-child">
+                    <dd><a @click="changeInfo" href="javascript:">个人资料</a></dd>
+                    <dd><a @click="change" href="javascript:">修改密码</a></dd>
+                    <dd><a href="javascript:">操作记录</a></dd>
+                    <hr>
+                    <dd style="text-align: center;"><a th:href="@{/}">退出登录</a></dd>
+                </dl>
+            </a>
+        </li>
+    </ul>
+    <div id="change" style="display: none">
+        <form class="layui-form" id="changeInfo">
+            <div class="layui-form-item"><label class="layui-form-label">用户id：</label><label
+                    class="layui-form-label" v-text="id"></label>
+            </div>
+            <div class="layui-form-item"><label class="layui-form-label">用户名：</label>
+                <div class="layui-input-inline" id="username">
+                    <input :value="username" autocomplete="off" class="layui-input" name="username"
+                           placeholder="请输入用户名" type="text"></div>
+            </div>
+            <div class="layui-form-item"><label class="layui-form-label">身份：</label><label
+                    class="layui-form-label" v-text="identity"></label>
+            </div>
+            <div class="layui-form-item"><label class="layui-form-label">状态：</label><label
+                    class="layui-form-label" v-text="status"></label>
+            </div>
+            <div class="layui-form-item"><label class="layui-form-label">更换头像：</label>
+                <input type="file">
+            </div>
+        </form>
+    </div>
+
+    <div style="display: none">
+        <form class="layui-form" id="changePassword">
+            <div class="layui-form-item"><label class="layui-form-label">旧密码：</label>
+                <div class="layui-input-inline" id="oPassword">
+                    <input autocomplete="off" class="layui-input" name="oPassword" placeholder="请输入旧密码"
+                           type="text" v-model:value="oPassword"></div>
+            </div>
+            <div class="layui-form-item"><label class="layui-form-label">新密码：</label>
+                <div class="layui-input-inline" id="nPassword">
+                    <input autocomplete="off" class="layui-input" name="nPassword" placeholder="请输入新密码"
+                           type="text" v-model:value="nPassword"></div>
+            </div>
+            <div class="layui-form-item"><label class="layui-form-label">确认密码：</label>
+                <div class="layui-input-inline" id="nPassword2">
+                    <input autocomplete="off" class="layui-input" name="nPassword2" placeholder="请再输入一次密码"
+                           type="text" v-model:value="nPassword2"></div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:fragment="CommonScript">
+    const layer = layui.layer;
+    let vue = new Vue({
+        el: "#header",
+        data: {
+            username: " ",
+            imgUrl: " ",
+            status: "",
+            identity: "",
+            id: "",
+            oPassword: " ",
+            nPassword: " ",
+            nPassword2: " ",
+        },
+        methods: {
+            changeInfo() {
+                $.ajax(
+                    {
+                        url: "/ajax/Info",
+                        type: "GET",
+                        data: "username=" + vue.username,
+                        success(result) {
+                            let data = result.data;
+                            vue.status = data.status === 0 ? '激活' : '冻结';
+                            vue.identity = data.identity === 0 ? '管理员' : '用户';
+                            vue.id = data.id;
+                            layer.open({
+                                title: '修改资料',
+                                type: 1,
+                                area: ['500px', '550px'],
+                                content: $("#changeInfo").html(),
+                                btn: ["确认修改", "取消"],
+                                btnAlign: 'c',
+                                success: function () {
+
+                                },
+                                init: function () {
+                                    console.log("被调用了")
+                                    vue.render();
+                                }
+                            })
+                        }
+                    }
+                )
+            },
+            change() {
+                layer.open({
+                    title: '修改密码',
+                    type: 1,
+                    area: ['350px', '270px'],
+                    content: $("#changePassword").html(),
+                    btn: ["确认修改", "取消"],
+                    btnAlign: 'c',
+                    yes: function (index) {
+                        if (vue.nPassword !== vue.nPassword2) {
+                            layer.alert("两次密码输入不一致，请重试！");
+                        } else {
+                            $.ajax({
+                                url: "/ajax/password",
+                                type: "POST",
+                                data: {
+                                    "oldPassword=": vue.oPassword,
+                                    "newPassword=": vue.nPassword,
+                                    "newPassword2=": vue.nPassword2
+                                },
+                                success(result) {
+                                    layer.alert(result.data.msg);
+                                    if (result.data.code === 0) {
+                                        layer.close(index);
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+            },
+            render() {
+                layui.upload.render({
+                    elem: '#upload',
+                    url: '/oss/policy',
+                    auto: false,
+                    done: function (res) {
+                        layer.msg('上传成功');
+                        console.log(res)
+                    }
+                });
+            }
+
+        },
+        created() {
+            $.ajax(
+                {
+                    url: "/ajax/getHead",
+                    type: "GET",
+                    success: function (result) {
+                        vue.username = result.data.username
+                        vue.imgUrl = result.data.imgUrl
+                    }
+                }
+            )
+        }
+    })
+</script>
+</body>
+</html>
